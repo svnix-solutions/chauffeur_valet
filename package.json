@@ -1,0 +1,15 @@
+{
+  "name": "chauffeur_valet",
+  "version": "1.0.0",
+  "description": "Valet for Customers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd valet && yarn install",
+    "dev": "cd valet && yarn dev",
+    "build": "cd valet && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
