@@ -5,3 +5,6 @@
 tags
 node_modules
 __pycache__
+chauffeur_valet/public/valet/
+chauffeur_valet/www/*.html
+yarn.lock
