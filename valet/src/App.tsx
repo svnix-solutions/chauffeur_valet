@@ -31,25 +31,23 @@ function App() {
   const queryClient = new QueryClient()
   return (
     <QueryClientProvider client={queryClient}>
-    <FrappeProvider>
-    <Router basename="/valet">
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <HomePage />
-            </MainLayout>
-          </ProtectedRoute>
-        }>
-          <Route index element={<HomePage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-      <Toaster />
-      </Router>
-    </FrappeProvider>
+      <FrappeProvider>
+        <Router basename="/valet">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<HomePage />} />
+              <Route path="profile" element={<ProfilePage />} />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+          <Toaster />
+        </Router>
+      </FrappeProvider>
     </QueryClientProvider>
   )
 }
