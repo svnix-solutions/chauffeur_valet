@@ -1,40 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { FrappeProvider } from 'frappe-react-sdk'
-import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import ProtectedRoute from '@/components/ProtectedRoute'
+
+// Pages
+import LoginPage from './pages/auth/LoginPage'
+import ProfilePage from './pages/profile/ProfilePage'
+import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
+import MainLayout from './components/layout/MainLayout'
 
 function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('SW registered:', registration)
+        }).catch(error => {
+          console.log('SW registration failed:', error)
+        })
+      })
+    }
+  }, [])
 
+  // Create a client
+  const queryClient = new QueryClient()
   return (
-	<div className="App">
-	  <FrappeProvider>
-		<Button>Click me</Button>
-		<div>
-	  <div>
-		<a href="https://vitejs.dev" target="_blank">
-		  <img src="/vite.svg" className="logo" alt="Vite logo" />
-		</a>
-		<a href="https://reactjs.org" target="_blank">
-		  <img src={reactLogo} className="logo react" alt="React logo" />
-		</a>
-	  </div>
-	  <h1>Vite + React + Frappe</h1>
-	  <div className="card">
-		<button onClick={() => setCount((count) => count + 1)}>
-		  count is {count}
-		</button>
-		<p>
-		  Edit <code>src/App.jsx</code> and save to test HMR
-		</p>
-	  </div>
-	  <p className="read-the-docs">
-		Click on the Vite and React logos to learn more
-	  </p>
-	  </div>
-	  </FrappeProvider>
-	</div>
+    <QueryClientProvider client={queryClient}>
+    <FrappeProvider>
+    <Router basename="/valet">
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <HomePage />
+            </MainLayout>
+          </ProtectedRoute>
+        }>
+          <Route index element={<HomePage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Toaster />
+      </Router>
+    </FrappeProvider>
+    </QueryClientProvider>
   )
 }
 
