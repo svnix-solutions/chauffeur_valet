@@ -16,6 +16,7 @@ import AccountSettingsPage from './pages/settings/AccountSettingsPage'
 import NotificationsPage from './pages/settings/NotificationsPage'
 import PrivacySecurityPage from './pages/settings/PrivacySecurityPage'
 import HelpSupportPage from './pages/settings/HelpSupportPage'
+import ServiceLocationPage from './pages/ServiceLocationPage'
 
 function App() {
   useEffect(() => {
@@ -47,6 +48,7 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="transactions" element={<TransactionsPage />} />
+              <Route path="service-location" element={<ServiceLocationPage />} />
               <Route path="settings/account" element={<AccountSettingsPage />} />
               <Route path="settings/notifications" element={<NotificationsPage />} />
               <Route path="settings/privacy" element={<PrivacySecurityPage />} />

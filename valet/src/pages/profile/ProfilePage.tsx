@@ -1,6 +1,6 @@
 import { useFrappeAuth } from 'frappe-react-sdk'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { LogOut, Bell, HelpCircle, Settings, Shield } from 'lucide-react'
+import { LogOut, Bell, HelpCircle, Settings, Shield, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 
@@ -37,6 +37,10 @@ export default function ProfilePage() {
       <Card>
         <CardHeader className="text-2xl font-bold pb-2">Settings</CardHeader>
         <CardContent className="flex flex-col gap-4 py-2">
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/service-location')}>
+            <MapPin className="w-5 h-5" />
+            <span className="text-base">Service Location</span>
+          </div>
           <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/settings/account')}>
             <Settings className="w-5 h-5" />
             <span className="text-base">Account Settings</span>

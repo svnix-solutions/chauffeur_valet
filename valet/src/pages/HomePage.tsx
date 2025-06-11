@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Car, DollarSign, Clock, MapPin } from 'lucide-react'
+import { Loader2, Car, DollarSign, Clock, MapPin, Eye } from 'lucide-react'
 
 interface Ride {
   name: string
@@ -22,16 +22,22 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeRides, setActiveRides] = useState<Ride[]>([])
   const [todayEarnings, setTodayEarnings] = useState(0)
+  const [expandedRide, setExpandedRide] = useState<string | null>(null)
+  const [viewedRides, setViewedRides] = useState<{ [rideId: string]: boolean }>({})
 
-  // Fetch active rides
+  // Fetch pending rides for driver's city and zone
   const { data: ridesData, isLoading: isLoadingRides } = useFrappeGetDocList<Ride>(
     'Ride',
     {
       filters: [
-        ['valet', '=', currentUser],
-        ['status', 'in', ['Assigned', 'In Progress']]
+        ['city', '=', currentUser?.city],
+        ['zone', '=', currentUser?.zone],
+        ['status', '=', 'Pending']
       ],
-      fields: ['name', 'status', 'pickup_location', 'dropoff_location', 'scheduled_time', 'customer_name', 'fare']
+      fields: [
+        'name', 'status', 'pickup_location', 'dropoff_location',
+        'scheduled_time', 'customer_name', 'fare', 'city', 'zone'
+      ]
     }
   )
 
@@ -61,20 +67,23 @@ export default function HomePage() {
     }
   }, [earningsData])
 
-  const handleStartRide = async (rideId: string) => {
-    try {
-      // TODO: Implement start ride functionality
-      toast({
-        title: "Ride started",
-        description: "You have started the ride successfully."
-      })
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to start the ride. Please try again."
-      })
-    }
+  // Mark ride as viewed (placeholder for backend call)
+  const markAsViewed = async (rideId: string) => {
+    // TODO: Call backend to update status to 'Viewed'
+    setViewedRides((prev) => ({ ...prev, [rideId]: true }))
+    toast({ title: 'Ride marked as viewed' })
+  }
+
+  // Accept/Ignore handlers (placeholder for backend call)
+  const handleAcceptRide = async (rideId: string) => {
+    // TODO: Call backend to update status to 'Accepted' or 'In Progress'
+    toast({ title: 'Ride accepted' })
+    setExpandedRide(null)
+  }
+  const handleIgnoreRide = async (rideId: string) => {
+    // TODO: Call backend to update status to 'Ignored'
+    toast({ title: 'Ride ignored' })
+    setExpandedRide(null)
   }
 
   const handleCompleteRide = async (rideId: string) => {
@@ -171,18 +180,26 @@ export default function HomePage() {
                             <p className="text-sm text-muted-foreground">{ride.dropoff_location}</p>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="font-medium">Fare: ${ride.fare}</p>
-                          {ride.status === 'Assigned' ? (
-                            <Button onClick={() => handleStartRide(ride.name)}>
-                              Start Ride
+                        {ride.status === 'Assigned' && expandedRide !== ride.name && !viewedRides[ride.name] && (
+                          <Button variant="outline" className="w-full" onClick={() => { setExpandedRide(ride.name); markAsViewed(ride.name) }}>
+                            <Eye className="w-4 h-4 mr-2" /> View Details
+                          </Button>
+                        )}
+                        {(expandedRide === ride.name || viewedRides[ride.name]) && ride.status === 'Assigned' && (
+                          <div className="flex gap-2">
+                            <Button className="flex-1" onClick={() => handleAcceptRide(ride.name)}>
+                              Accept
                             </Button>
-                          ) : (
-                            <Button onClick={() => handleCompleteRide(ride.name)}>
-                              Complete Ride
+                            <Button className="flex-1" variant="outline" onClick={() => handleIgnoreRide(ride.name)}>
+                              Ignore
                             </Button>
-                          )}
-                        </div>
+                          </div>
+                        )}
+                        {ride.status === 'In Progress' && (
+                          <Button onClick={() => handleCompleteRide(ride.name)}>
+                            Complete Ride
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
