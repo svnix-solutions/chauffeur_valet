@@ -1,187 +1,66 @@
-import { useState, useEffect } from 'react'
-import { useFrappeAuth, useFrappeGetDoc } from 'frappe-react-sdk'
-import { useToast } from '@/components/ui/use-toast'
+import { useFrappeAuth } from 'frappe-react-sdk'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { LogOut, Bell, HelpCircle, Settings, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
-
-interface ValetProfile {
-  name: string
-  full_name: string
-  email: string
-  phone: string
-  address: string
-  vehicle_number: string
-  vehicle_type: string
-  license_number: string
-}
+import { useNavigate } from 'react-router-dom'
 
 export default function ProfilePage() {
-  const { currentUser } = useFrappeAuth()
-  const { toast } = useToast()
-  const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [profile, setProfile] = useState<ValetProfile>({
-    name: '',
-    full_name: '',
-    email: '',
-    phone: '',
-    address: '',
-    vehicle_number: '',
-    vehicle_type: '',
-    license_number: ''
-  })
-
-  const { data, isLoading: isLoadingProfile } = useFrappeGetDoc<ValetProfile>(
-    'Valet',
-    currentUser || ''
-  )
-
-  useEffect(() => {
-    if (data) {
-      setProfile(data)
-    }
-  }, [data])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // TODO: Implement profile update
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully."
-      })
-      setIsEditing(false)
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Update failed",
-        description: "Failed to update profile. Please try again."
-      })
-    } finally {
-      setIsLoading(false)
-    }
+  const { currentUser, logout } = useFrappeAuth()
+  const navigate = useNavigate()
+  const user = {
+    name: currentUser?.full_name || currentUser?.name || 'Administrator',
+    email: currentUser?.email || 'admin@example.com',
   }
-
-  if (isLoadingProfile) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    )
-  }
+  const initials = user.name
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="mx-auto max-w-md py-6 px-2 min-h-screen flex flex-col gap-6">
+      {/* User Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>
-            Manage your valet profile information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <Input
-                  id="full_name"
-                  value={profile.full_name}
-                  onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={profile.phone}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={profile.address}
-                  onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vehicle_number">Vehicle Number</Label>
-                <Input
-                  id="vehicle_number"
-                  value={profile.vehicle_number}
-                  onChange={(e) => setProfile({ ...profile, vehicle_number: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vehicle_type">Vehicle Type</Label>
-                <Input
-                  id="vehicle_type"
-                  value={profile.vehicle_type}
-                  onChange={(e) => setProfile({ ...profile, vehicle_type: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="license_number">License Number</Label>
-                <Input
-                  id="license_number"
-                  value={profile.license_number}
-                  onChange={(e) => setProfile({ ...profile, license_number: e.target.value })}
-                  disabled={!isEditing}
-                />
-              </div>
-            </div>
+        <CardContent className="flex items-center gap-4 py-6">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-3xl font-bold text-primary">
+            {initials}
+          </div>
+          <div>
+            <div className="text-2xl font-bold leading-tight">{user.name}</div>
+            <div className="text-muted-foreground text-base">{user.email}</div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="flex justify-end space-x-4">
-              {isEditing ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditing(false)}
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                >
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </form>
+      {/* Settings Card */}
+      <Card>
+        <CardHeader className="text-2xl font-bold pb-2">Settings</CardHeader>
+        <CardContent className="flex flex-col gap-4 py-2">
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/settings/account')}>
+            <Settings className="w-5 h-5" />
+            <span className="text-base">Account Settings</span>
+          </div>
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/settings/notifications')}>
+            <Bell className="w-5 h-5" />
+            <span className="text-base">Notifications</span>
+          </div>
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/settings/privacy')}>
+            <Shield className="w-5 h-5" />
+            <span className="text-base">Privacy & Security</span>
+          </div>
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted rounded px-2 py-2" onClick={() => navigate('/settings/help')}>
+            <HelpCircle className="w-5 h-5" />
+            <span className="text-base">Help & Support</span>
+          </div>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 text-red-600 hover:bg-red-50 justify-start px-2 py-2 mt-2"
+            onClick={logout}
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Sign Out</span>
+          </Button>
         </CardContent>
       </Card>
     </div>

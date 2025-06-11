@@ -27,10 +27,10 @@ export default function HomePage() {
   const { data: ridesData, isLoading: isLoadingRides } = useFrappeGetDocList<Ride>(
     'Ride',
     {
-      filters: {
-        valet: currentUser,
-        status: ['in', ['Assigned', 'In Progress']]
-      },
+      filters: [
+        ['valet', '=', currentUser],
+        ['status', 'in', ['Assigned', 'In Progress']]
+      ],
       fields: ['name', 'status', 'pickup_location', 'dropoff_location', 'scheduled_time', 'customer_name', 'fare']
     }
   )
@@ -39,11 +39,11 @@ export default function HomePage() {
   const { data: earningsData, isLoading: isLoadingEarnings } = useFrappeGetDocList(
     'Ride',
     {
-      filters: {
-        valet: currentUser,
-        status: 'Completed',
-        completion_date: ['>=', new Date().toISOString().split('T')[0]]
-      },
+      filters: [
+        ['valet', '=', currentUser],
+        ['status', '=', 'Completed'],
+        ['completion_date', '>=', new Date().toISOString().split('T')[0]]
+      ],
       fields: ['fare']
     }
   )
@@ -102,8 +102,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container py-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="mx-auto max-w-md py-6 px-2 min-h-screen flex flex-col">
+      <div className="flex flex-col gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Today's Earnings</CardTitle>
@@ -124,7 +124,7 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <div className="mt-8">
+      <div className="mb-4">
         <Tabs defaultValue="active" className="w-full">
           <TabsList>
             <TabsTrigger value="active">Active Rides</TabsTrigger>
@@ -133,7 +133,7 @@ export default function HomePage() {
           <TabsContent value="active" className="mt-4">
             {activeRides.length === 0 ? (
               <Card>
-                <CardContent className="pt-6">
+                <CardContent className="flex items-center justify-center h-32">
                   <p className="text-center text-muted-foreground">No active rides at the moment</p>
                 </CardContent>
               </Card>
@@ -192,7 +192,7 @@ export default function HomePage() {
           </TabsContent>
           <TabsContent value="scheduled" className="mt-4">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="flex items-center justify-center h-32">
                 <p className="text-center text-muted-foreground">No scheduled rides</p>
               </CardContent>
             </Card>

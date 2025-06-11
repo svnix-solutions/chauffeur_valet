@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { FrappeProvider } from 'frappe-react-sdk'
 import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/components/ui/use-toast"
 import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -10,8 +9,13 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import LoginPage from './pages/auth/LoginPage'
 import ProfilePage from './pages/profile/ProfilePage'
 import HomePage from './pages/HomePage'
+import TransactionsPage from './pages/TransactionsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import MainLayout from './components/layout/MainLayout'
+import AccountSettingsPage from './pages/settings/AccountSettingsPage'
+import NotificationsPage from './pages/settings/NotificationsPage'
+import PrivacySecurityPage from './pages/settings/PrivacySecurityPage'
+import HelpSupportPage from './pages/settings/HelpSupportPage'
 
 function App() {
   useEffect(() => {
@@ -42,6 +46,11 @@ function App() {
             }>
               <Route index element={<HomePage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="transactions" element={<TransactionsPage />} />
+              <Route path="settings/account" element={<AccountSettingsPage />} />
+              <Route path="settings/notifications" element={<NotificationsPage />} />
+              <Route path="settings/privacy" element={<PrivacySecurityPage />} />
+              <Route path="settings/help" element={<HelpSupportPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useFrappeAuth } from 'frappe-react-sdk'
-import { Home, User, LogOut } from 'lucide-react'
+import { Home, User, LogOut, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +27,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
       label: 'Home',
       icon: Home,
       path: '/'
+    },
+    {
+      label: 'Transactions',
+      icon: List,
+      path: '/transactions'
     },
     {
       label: 'Profile',
@@ -56,14 +61,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <span className="text-xs">{item.label}</span>
             </Button>
           ))}
-          <Button
-            variant="ghost"
-            className="flex flex-col items-center gap-1 h-full"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="text-xs">Logout</span>
-          </Button>
         </div>
       </nav>
     </div>
