@@ -24,6 +24,8 @@ export default function HomePage() {
   const [todayEarnings, setTodayEarnings] = useState(0)
   const [expandedRide, setExpandedRide] = useState<string | null>(null)
   const [viewedRides, setViewedRides] = useState<{ [rideId: string]: boolean }>({})
+  const [otpInput, setOtpInput] = useState<{ [rideId: string]: string }>({})
+  const [showOtp, setShowOtp] = useState<{ [rideId: string]: boolean }>({})
 
   // Fetch pending rides for driver's city and zone
   const { data: ridesData, isLoading: isLoadingRides } = useFrappeGetDocList<Ride>(
@@ -76,7 +78,7 @@ export default function HomePage() {
 
   // Accept/Ignore handlers (placeholder for backend call)
   const handleAcceptRide = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Accepted' or 'In Progress'
+    // TODO: Call backend to update status to 'Accepted'
     toast({ title: 'Ride accepted' })
     setExpandedRide(null)
   }
@@ -86,20 +88,24 @@ export default function HomePage() {
     setExpandedRide(null)
   }
 
+  // Status action handlers (placeholders for backend calls)
+  const handleOnTheWay = async (rideId: string) => {
+    // TODO: Call backend to update status to 'On the Way'
+    toast({ title: 'Marked as On the Way' })
+  }
+  const handleReached = async (rideId: string) => {
+    // TODO: Call backend to update status to 'Reached'
+    toast({ title: 'Marked as Reached' })
+  }
+  const handleStartTrip = async (rideId: string) => {
+    // TODO: Validate OTP with backend, then update status to 'In Progress'
+    toast({ title: 'Trip started' })
+    setShowOtp((prev) => ({ ...prev, [rideId]: false }))
+    setOtpInput((prev) => ({ ...prev, [rideId]: '' }))
+  }
   const handleCompleteRide = async (rideId: string) => {
-    try {
-      // TODO: Implement complete ride functionality
-      toast({
-        title: "Ride completed",
-        description: "You have completed the ride successfully."
-      })
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to complete the ride. Please try again."
-      })
-    }
+    // TODO: Call backend to update status to 'Completed'
+    toast({ title: 'Ride completed' })
   }
 
   if (isLoadingRides || isLoadingEarnings) {
@@ -180,12 +186,13 @@ export default function HomePage() {
                             <p className="text-sm text-muted-foreground">{ride.dropoff_location}</p>
                           </div>
                         </div>
-                        {ride.status === 'Assigned' && expandedRide !== ride.name && !viewedRides[ride.name] && (
+                        {/* Accept/Ignore for Pending */}
+                        {ride.status === 'Pending' && expandedRide !== ride.name && !viewedRides[ride.name] && (
                           <Button variant="outline" className="w-full" onClick={() => { setExpandedRide(ride.name); markAsViewed(ride.name) }}>
                             <Eye className="w-4 h-4 mr-2" /> View Details
                           </Button>
                         )}
-                        {(expandedRide === ride.name || viewedRides[ride.name]) && ride.status === 'Assigned' && (
+                        {(expandedRide === ride.name || viewedRides[ride.name]) && ride.status === 'Pending' && (
                           <div className="flex gap-2">
                             <Button className="flex-1" onClick={() => handleAcceptRide(ride.name)}>
                               Accept
@@ -195,8 +202,43 @@ export default function HomePage() {
                             </Button>
                           </div>
                         )}
+                        {/* On the Way */}
+                        {ride.status === 'Accepted' && (
+                          <Button className="w-full" onClick={() => handleOnTheWay(ride.name)}>
+                            On the Way
+                          </Button>
+                        )}
+                        {/* Reached */}
+                        {ride.status === 'On the Way' && (
+                          <Button className="w-full" onClick={() => handleReached(ride.name)}>
+                            Reached
+                          </Button>
+                        )}
+                        {/* Start Trip (OTP) */}
+                        {ride.status === 'Reached' && (
+                          <div className="flex flex-col gap-2">
+                            {!showOtp[ride.name] ? (
+                              <Button className="w-full" onClick={() => setShowOtp((prev) => ({ ...prev, [ride.name]: true }))}>
+                                Start Trip (OTP)
+                              </Button>
+                            ) : (
+                              <form className="flex gap-2" onSubmit={e => { e.preventDefault(); handleStartTrip(ride.name) }}>
+                                <input
+                                  type="text"
+                                  placeholder="Enter OTP"
+                                  className="flex-1 rounded border px-2 py-1"
+                                  value={otpInput[ride.name] || ''}
+                                  onChange={e => setOtpInput((prev) => ({ ...prev, [ride.name]: e.target.value }))}
+                                  required
+                                />
+                                <Button type="submit">Submit</Button>
+                              </form>
+                            )}
+                          </div>
+                        )}
+                        {/* Complete Ride */}
                         {ride.status === 'In Progress' && (
-                          <Button onClick={() => handleCompleteRide(ride.name)}>
+                          <Button className="w-full" onClick={() => handleCompleteRide(ride.name)}>
                             Complete Ride
                           </Button>
                         )}
