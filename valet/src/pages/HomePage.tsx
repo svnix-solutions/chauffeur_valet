@@ -14,6 +14,8 @@ interface Ride {
   scheduled_time: string
   customer_name: string
   fare: number
+  serviceable_city?: string
+  serviceable_zone?: string
 }
 
 export default function HomePage() {
@@ -27,18 +29,18 @@ export default function HomePage() {
   const [otpInput, setOtpInput] = useState<{ [rideId: string]: string }>({})
   const [showOtp, setShowOtp] = useState<{ [rideId: string]: boolean }>({})
 
-  // Fetch pending rides for driver's city and zone
+  // Fetch pending rides for driver's serviceable city and zone
   const { data: ridesData, isLoading: isLoadingRides } = useFrappeGetDocList<Ride>(
     'Ride',
     {
       filters: [
-        ['city', '=', currentUser?.city],
-        ['zone', '=', currentUser?.zone],
+        ['Serviceable City', '=', (typeof currentUser === 'object' && currentUser?.serviceable_city) || ''],
+        ['Serviceable Zone', '=', (typeof currentUser === 'object' && currentUser?.serviceable_zone) || ''],
         ['status', '=', 'Pending']
       ],
       fields: [
         'name', 'status', 'pickup_location', 'dropoff_location',
-        'scheduled_time', 'customer_name', 'fare', 'city', 'zone'
+        'scheduled_time', 'customer_name', 'fare', 'Serviceable City', 'Serviceable Zone'
       ]
     }
   )

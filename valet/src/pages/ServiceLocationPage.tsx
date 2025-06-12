@@ -6,30 +6,30 @@ import { Label } from '@/components/ui/label'
 
 export default function ServiceLocationPage() {
   const { currentUser } = useFrappeAuth()
-  const [city, setCity] = useState(currentUser?.city || '')
-  const [zone, setZone] = useState(currentUser?.zone || '')
-  const [cities, setCities] = useState<string[]>([])
-  const [zones, setZones] = useState<string[]>([])
+  const [serviceableCity, setServiceableCity] = useState((typeof currentUser === 'object' && currentUser?.serviceable_city) || '')
+  const [serviceableZone, setServiceableZone] = useState((typeof currentUser === 'object' && currentUser?.serviceable_zone) || '')
+  const [serviceableCities, setServiceableCities] = useState<string[]>([])
+  const [serviceableZones, setServiceableZones] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     // TODO: Replace with backend call
-    setCities(['Mumbai', 'Delhi', 'Bangalore'])
+    setServiceableCities(['Mumbai', 'Delhi', 'Bangalore'])
   }, [])
 
   useEffect(() => {
     // TODO: Replace with backend call
-    if (city === 'Mumbai') setZones(['South Mumbai', 'Andheri', 'Borivali'])
-    else if (city === 'Delhi') setZones(['South Delhi', 'Dwarka', 'Rohini'])
-    else if (city === 'Bangalore') setZones(['Whitefield', 'Koramangala', 'Indiranagar'])
-    else setZones([])
-    setZone('')
-  }, [city])
+    if (serviceableCity === 'Mumbai') setServiceableZones(['South Mumbai', 'Andheri', 'Borivali'])
+    else if (serviceableCity === 'Delhi') setServiceableZones(['South Delhi', 'Dwarka', 'Rohini'])
+    else if (serviceableCity === 'Bangalore') setServiceableZones(['Whitefield', 'Koramangala', 'Indiranagar'])
+    else setServiceableZones([])
+    setServiceableZone('')
+  }, [serviceableCity])
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
-    // TODO: Save city and zone to backend
+    // TODO: Save serviceable_city and serviceable_zone to backend
     setTimeout(() => setSaving(false), 1000)
   }
 
@@ -42,30 +42,30 @@ export default function ServiceLocationPage() {
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSave}>
             <div>
-              <Label htmlFor="city">City</Label>
+              <Label htmlFor="serviceable_city">Serviceable City</Label>
               <select
-                id="city"
+                id="serviceable_city"
                 className="w-full mt-1 rounded border px-3 py-2"
-                value={city}
-                onChange={e => setCity(e.target.value)}
+                value={serviceableCity}
+                onChange={e => setServiceableCity(e.target.value)}
                 required
               >
-                <option value="" disabled>Select city</option>
-                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                <option value="" disabled>Select serviceable city</option>
+                {serviceableCities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <Label htmlFor="zone">Zone</Label>
+              <Label htmlFor="serviceable_zone">Serviceable Zone</Label>
               <select
-                id="zone"
+                id="serviceable_zone"
                 className="w-full mt-1 rounded border px-3 py-2"
-                value={zone}
-                onChange={e => setZone(e.target.value)}
+                value={serviceableZone}
+                onChange={e => setServiceableZone(e.target.value)}
                 required
-                disabled={!city}
+                disabled={!serviceableCity}
               >
-                <option value="" disabled>Select zone</option>
-                {zones.map(z => <option key={z} value={z}>{z}</option>)}
+                <option value="" disabled>Select serviceable zone</option>
+                {serviceableZones.map(z => <option key={z} value={z}>{z}</option>)}
               </select>
             </div>
             <Button type="submit" className="w-full mt-2" disabled={saving}>
