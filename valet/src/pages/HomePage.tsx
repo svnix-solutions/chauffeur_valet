@@ -1,3 +1,11 @@
+// @ts-ignore
+// eslint-disable-next-line
+declare global {
+  interface Window {
+    frappe: any;
+  }
+}
+
 import { useState, useEffect } from 'react'
 import { useFrappeAuth, useFrappeGetDocList } from 'frappe-react-sdk'
 import { useToast } from '@/components/ui/use-toast'
@@ -12,8 +20,8 @@ interface Ride {
   pickup_location: string
   dropoff_location: string
   scheduled_time: string
-  customer_name: string
-  fare: number
+  customer: string
+  total_amount: number
   serviceable_city?: string
   serviceable_zone?: string
 }
@@ -34,13 +42,13 @@ export default function HomePage() {
     'Ride',
     {
       filters: [
-        ['Serviceable City', '=', (typeof currentUser === 'object' && currentUser?.serviceable_city) || ''],
-        ['Serviceable Zone', '=', (typeof currentUser === 'object' && currentUser?.serviceable_zone) || ''],
+        ['serviceable_city', '=', (typeof currentUser === 'object' && (currentUser as any)?.serviceable_city) || ''],
+        ['serviceable_zone', '=', (typeof currentUser === 'object' && (currentUser as any)?.serviceable_zone) || ''],
         ['status', '=', 'Pending']
       ],
       fields: [
         'name', 'status', 'pickup_location', 'dropoff_location',
-        'scheduled_time', 'customer_name', 'fare', 'Serviceable City', 'Serviceable Zone'
+        'scheduled_time', 'customer', 'total_amount', 'serviceable_city', 'serviceable_zone'
       ]
     }
   )
@@ -50,11 +58,11 @@ export default function HomePage() {
     'Ride',
     {
       filters: [
-        ['valet', '=', currentUser],
+        ['valet', '=', (typeof currentUser === 'string' ? currentUser : (currentUser as any)?.name)],
         ['status', '=', 'Completed'],
         ['completion_date', '>=', new Date().toISOString().split('T')[0]]
       ],
-      fields: ['fare']
+      fields: ['total_amount']
     }
   )
 
@@ -71,43 +79,100 @@ export default function HomePage() {
     }
   }, [earningsData])
 
-  // Mark ride as viewed (placeholder for backend call)
+  // Mark ride as viewed (backend call)
   const markAsViewed = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Viewed'
-    setViewedRides((prev) => ({ ...prev, [rideId]: true }))
-    toast({ title: 'Ride marked as viewed' })
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.mark_ride_as_viewed', args: { ride_id: rideId } })
+      if (res.message?.success) {
+        setViewedRides((prev) => ({ ...prev, [rideId]: true }))
+        toast({ title: 'Ride marked as viewed' })
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to mark as viewed', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to mark as viewed', variant: 'destructive' })
+    }
   }
 
-  // Accept/Ignore handlers (placeholder for backend call)
+  // Accept/Ignore handlers (backend call)
   const handleAcceptRide = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Accepted'
-    toast({ title: 'Ride accepted' })
-    setExpandedRide(null)
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.accept_ride', args: { ride_id: rideId } })
+      if (res.message?.success) {
+        toast({ title: 'Ride accepted' })
+        setExpandedRide(null)
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to accept ride', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to accept ride', variant: 'destructive' })
+    }
   }
   const handleIgnoreRide = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Ignored'
-    toast({ title: 'Ride ignored' })
-    setExpandedRide(null)
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.ignore_ride', args: { ride_id: rideId } })
+      if (res.message?.success) {
+        toast({ title: 'Ride ignored' })
+        setExpandedRide(null)
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to ignore ride', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to ignore ride', variant: 'destructive' })
+    }
   }
 
-  // Status action handlers (placeholders for backend calls)
+  // Status action handlers (backend calls)
   const handleOnTheWay = async (rideId: string) => {
-    // TODO: Call backend to update status to 'On the Way'
-    toast({ title: 'Marked as On the Way' })
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.update_ride_status', args: { ride_id: rideId, new_status: 'On the Way' } })
+      if (res.message?.success) {
+        toast({ title: 'Marked as On the Way' })
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to update status', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to update status', variant: 'destructive' })
+    }
   }
   const handleReached = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Reached'
-    toast({ title: 'Marked as Reached' })
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.update_ride_status', args: { ride_id: rideId, new_status: 'Reached' } })
+      if (res.message?.success) {
+        toast({ title: 'Marked as Reached' })
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to update status', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to update status', variant: 'destructive' })
+    }
   }
   const handleStartTrip = async (rideId: string) => {
-    // TODO: Validate OTP with backend, then update status to 'In Progress'
-    toast({ title: 'Trip started' })
-    setShowOtp((prev) => ({ ...prev, [rideId]: false }))
-    setOtpInput((prev) => ({ ...prev, [rideId]: '' }))
+    try {
+      const otp = otpInput[rideId] || ''
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.start_trip', args: { ride_id: rideId, otp } })
+      if (res.message?.success) {
+        toast({ title: 'Trip started' })
+        setShowOtp((prev) => ({ ...prev, [rideId]: false }))
+        setOtpInput((prev) => ({ ...prev, [rideId]: '' }))
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to start trip', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to start trip', variant: 'destructive' })
+    }
   }
   const handleCompleteRide = async (rideId: string) => {
-    // TODO: Call backend to update status to 'Completed'
-    toast({ title: 'Ride completed' })
+    try {
+      const res = await window.frappe.call({ method: 'chauffeur_valet.valet.update_ride_status', args: { ride_id: rideId, new_status: 'Completed' } })
+      if (res.message?.success) {
+        toast({ title: 'Ride completed' })
+      } else {
+        toast({ title: 'Error', description: res.message?.message || 'Failed to complete ride', variant: 'destructive' })
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to complete ride', variant: 'destructive' })
+    }
   }
 
   if (isLoadingRides || isLoadingEarnings) {
