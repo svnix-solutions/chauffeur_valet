@@ -26,6 +26,16 @@ def accept_ride(ride_id):
         if ride.status not in ["Pending", "Viewed"]:
             return {"success": False, "message": "Only pending or viewed rides can be accepted."}
         ride.status = "Accepted"
+
+        # Set driver info from User DocType
+        driver_user = frappe.session.user
+        driver_doc = frappe.get_doc("User", driver_user)
+        driver_name = getattr(driver_doc, "full_name", None) or getattr(driver_doc, "first_name", None) or driver_user
+        driver_phone = getattr(driver_doc, "phone", None) or getattr(driver_doc, "mobile_no", None)
+        ride.driver = driver_user
+        ride.driver_name = driver_name
+        ride.driver_phone = driver_phone
+
         ride.save()
         return {"success": True, "message": "Ride accepted."}
     except Exception as e:
