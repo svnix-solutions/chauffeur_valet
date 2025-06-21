@@ -36,6 +36,19 @@ def accept_ride(ride_id):
         ride.driver_name = driver_name
         ride.driver_phone = driver_phone
 
+        # Set supplier info for the current driver
+        try:
+            suppliers = frappe.get_all(
+                "Supplier",
+                filters={"custom_user": driver_user},
+                fields=["name"],
+                limit=1
+            )
+            if suppliers:
+                ride.supplier = suppliers[0].name
+        except Exception as e:
+            frappe.log_error(f"Error setting supplier for ride {ride_id}: {str(e)}")
+
         ride.save()
         return {"success": True, "message": "Ride accepted."}
     except Exception as e:
