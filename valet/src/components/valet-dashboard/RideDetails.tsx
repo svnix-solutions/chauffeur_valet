@@ -16,6 +16,8 @@ interface RideDetailsProps {
 export const RideDetails: React.FC<RideDetailsProps> = ({ ride, onClose, onStatusChange }) => {
   const [showOtp, setShowOtp] = useState(false);
   const [otpInput, setOtpInput] = useState('');
+  const [showReceivedAmount, setShowReceivedAmount] = useState(false);
+  const [receivedAmount, setReceivedAmount] = useState('');
 
   const { call: markAsViewed } = useFrappePostCall('chauffeur_valet.valet.mark_ride_as_viewed');
   const { call: acceptRide } = useFrappePostCall('chauffeur_valet.valet.accept_ride');
@@ -99,8 +101,14 @@ export const RideDetails: React.FC<RideDetailsProps> = ({ ride, onClose, onStatu
 
   const handleCompleteRide = async () => {
     try {
-      const result = await updateRideStatus({ ride_id: ride.name, new_status: 'Completed' });
+      const result = await updateRideStatus({ 
+        ride_id: ride.name, 
+        new_status: 'Completed',
+        received_amount: receivedAmount || null
+      });
       if (result.success) {
+        setShowReceivedAmount(false);
+        setReceivedAmount('');
         onStatusChange();
         onClose();
       }
@@ -131,6 +139,10 @@ export const RideDetails: React.FC<RideDetailsProps> = ({ ride, onClose, onStatu
     setOtpInput(e.target.value);
   };
 
+  const handleReceivedAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReceivedAmount(e.target.value);
+  };
+
   return (
     <Card className="p-4">
       <View className="space-y-4">
@@ -147,6 +159,7 @@ export const RideDetails: React.FC<RideDetailsProps> = ({ ride, onClose, onStatu
           <Text>Customer: {ride.customer_name}</Text>
           {ride.notes && <Text>Notes: {ride.notes}</Text>}
           {ride.total_amount && <Text>Amount: ${ride.total_amount}</Text>}
+          {ride.received_amount && <Text>Received: ${ride.received_amount}</Text>}
           {ride.serviceable_city && <Text>City: {ride.serviceable_city}</Text>}
           {ride.serviceable_zone && <Text>Zone: {ride.serviceable_zone}</Text>}
         </View>
@@ -179,8 +192,28 @@ export const RideDetails: React.FC<RideDetailsProps> = ({ ride, onClose, onStatu
               <Button onClick={handleStartTrip}>Start Trip</Button>
             </View>
           )}
-          {ride.status === 'In Progress' && (
-            <Button onClick={handleCompleteRide}>Complete Ride</Button>
+          {ride.status === 'In Progress' && !showReceivedAmount && (
+            <Button onClick={() => setShowReceivedAmount(true)}>Complete Ride</Button>
+          )}
+          {(ride.status === 'In Progress' && showReceivedAmount) && (
+            <View className="space-y-2">
+              <Text>Enter received amount:</Text>
+              <Input
+                type="number"
+                value={receivedAmount}
+                onChange={handleReceivedAmountChange}
+                placeholder="Enter amount received"
+                step="0.01"
+                min="0"
+              />
+              <View className="flex gap-2">
+                <Button onClick={handleCompleteRide}>Complete Ride</Button>
+                <Button variant="outline" onClick={() => {
+                  setShowReceivedAmount(false);
+                  setReceivedAmount('');
+                }}>Cancel</Button>
+              </View>
+            </View>
           )}
         </View>
       </View>

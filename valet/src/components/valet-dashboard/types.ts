@@ -4,9 +4,11 @@ export interface Ride {
   pickup_location: string;
   dropoff_location: string;
   scheduled_time: string;
+  customer: string;
   customer_name: string;
   notes?: string;
   total_amount?: number;
+  received_amount?: number;
   serviceable_city?: string;
   serviceable_zone?: string;
   otp?: string;

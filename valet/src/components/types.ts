@@ -6,6 +6,7 @@ export interface Ride {
   scheduled_time: string
   customer: string
   total_amount: number
+  received_amount?: number
   serviceable_city?: string
   serviceable_zone?: string
 }

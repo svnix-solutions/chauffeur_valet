@@ -69,7 +69,7 @@ def ignore_ride(ride_id):
         return {"success": False, "message": str(e)}
 
 @frappe.whitelist()
-def update_ride_status(ride_id, new_status):
+def update_ride_status(ride_id, new_status, received_amount=None):
     try:
         ride = frappe.get_doc("Ride", ride_id)
         valid_statuses = ["On the Way", "Reached", "In Progress", "Completed"]
@@ -86,6 +86,22 @@ def update_ride_status(ride_id, new_status):
         
         if ride.status not in status_flow or new_status not in status_flow[ride.status]:
             return {"success": False, "message": f"Cannot transition from {ride.status} to {new_status}"}
+        
+        # Handle received amount for completed rides
+        if new_status == "Completed" and received_amount is not None:
+            try:
+                received_amount = float(received_amount)
+                if received_amount < 0:
+                    return {"success": False, "message": "Received amount cannot be negative"}
+                ride.received_amount = received_amount
+                
+                # Update payment status based on received amount
+                if ride.total_amount and received_amount >= ride.total_amount:
+                    ride.payment_status = "Paid"
+                else:
+                    ride.payment_status = "Pending"
+            except (ValueError, TypeError):
+                return {"success": False, "message": "Invalid received amount value"}
         
         ride.status = new_status
         ride.save()

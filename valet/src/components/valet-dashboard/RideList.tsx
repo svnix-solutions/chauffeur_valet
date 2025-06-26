@@ -10,7 +10,7 @@ export const RideList: React.FC = () => {
   const { data: rides, mutate } = useFrappeGetDocList<Ride>(
     'Ride',
     {
-      fields: ['name', 'status', 'pickup_location', 'dropoff_location', 'scheduled_time', 'customer', 'total_amount', 'serviceable_city', 'serviceable_zone', 'otp'],
+      fields: ['name', 'status', 'pickup_location', 'dropoff_location', 'scheduled_time', 'customer', 'total_amount', 'received_amount', 'serviceable_city', 'serviceable_zone', 'otp'],
       filters: [['status', '!=', 'Completed']],
       orderBy: {
         field: 'scheduled_time',
